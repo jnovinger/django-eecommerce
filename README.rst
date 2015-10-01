@@ -8,6 +8,9 @@ django-eecommerce
 .. image:: https://travis-ci.org/jnovinger/django-eecommerce.png?branch=master
     :target: https://travis-ci.org/jnovinger/django-eecommerce
 
+.. image:: http://codecov.io/github/jnovinger/django-eecommerce/coverage.svg?branch=master
+    :target: http://codecov.io/github/jnovinger/django-eecommerce?branch=master
+
 Your project description goes here
 
 Documentation
