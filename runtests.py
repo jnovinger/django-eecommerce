@@ -1,8 +1,9 @@
+#!/usr/bin/env python
+
 import sys
 
 try:
     from django.conf import settings
-    from django.test.utils import get_runner
 
     settings.configure(
         DEBUG=True,
@@ -31,10 +32,12 @@ try:
     else:
         setup()
 
-except ImportError:
+    from django_nose import NoseTestSuiteRunner
+
+except ImportError as ex:
     import traceback
     traceback.print_exc()
-    raise ImportError("To fix this error, run: pip install -r requirements-test.txt")
+    raise ImportError("To fix this error, run: pip install -r requirements/test.txt")
 
 
 def run_tests(*test_args):
@@ -42,8 +45,7 @@ def run_tests(*test_args):
         test_args = ['tests']
 
     # Run tests
-    TestRunner = get_runner(settings)
-    test_runner = TestRunner()
+    test_runner = NoseTestSuiteRunner(verbosity=1)
 
     failures = test_runner.run_tests(test_args)
 
