@@ -3,10 +3,10 @@
 language: python
 
 python:
-  - "2.7"
+    - "2.7"
 
 before_install:
-  - pip install codecov
+    - pip install -U pip setuptools wheel codecov
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -r requirements/test.txt
@@ -15,4 +15,10 @@ install: pip install -r requirements/test.txt
 script: coverage run --source eecommerce runtests.py
 
 after_success:
-  - codecov
+    - codecov
+
+
+cache:
+    directories:
+        - $HOME/.pip-cache/
+        - $HOME/.cache/pip/
