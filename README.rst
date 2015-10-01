@@ -16,7 +16,7 @@ Your project description goes here
 Documentation
 -------------
 
-The full documentation is at https://django-eecommerce.readthedocs.org.
+The full documentation _will_ reside at https://django-eecommerce.readthedocs.org.
 
 Quickstart
 ----------
@@ -32,7 +32,7 @@ Then use it in a project::
 Features
 --------
 
-* TODO
+* Backend tracking of ecommerce inventory for use with Google Analytics Enhanced Ecommerice.
 
 Cookiecutter Tools Used in Making This Package
 ----------------------------------------------
