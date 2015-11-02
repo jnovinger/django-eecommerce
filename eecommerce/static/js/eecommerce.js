@@ -13,14 +13,14 @@ var EETracker = (function(){
     this.getFieldedObject = this.getFieldedObject.bind(this);
 
     this.setData(data);
-  }
+  };
 
   /**
    * The data provided to the constructor for this page
    * @type {array}
    * @private
    */
-  EETracker.prototype.data = [];
+  EETracker.prototype.data = null;
 
   /**
    * Parse and set the JSON blob set in the page.
@@ -31,13 +31,13 @@ var EETracker = (function(){
       data = JSON.parse(data);
     }
     this.data = data;
-  }
+  };
 
   /**
    * Fields common many actions
    * @type {array}
    */
-  EETracker.baseFields = ['id', 'name', 'brand']
+  EETracker.baseFields = ['id', 'name', 'brand'];
 
   /**
    * Fields for 'impression' actions
@@ -62,7 +62,7 @@ var EETracker = (function(){
    */
   EETracker.prototype.getFields = function(action) {
     return EETracker[action + 'Fields'];
-  }
+  };
 
   /**
    * Return an array of properly formatted `impression` objects
@@ -70,7 +70,7 @@ var EETracker = (function(){
    */
   EETracker.prototype.getImpressions = function() {
     return this.data.map(this.getImpression, this);
-  }
+  };
 
   /**
    * Returns properly formatted `impression` objects consumable by GA
@@ -79,7 +79,7 @@ var EETracker = (function(){
    */
   EETracker.prototype.getImpression = function(item) {
     return this.getFieldedObject('impression', item);
-  }
+  };
 
   /**
    * Return an array of properly formatted `click` objects
@@ -87,7 +87,7 @@ var EETracker = (function(){
    */
   EETracker.prototype.getClicks = function() {
     return this.data.map(this.getClick, this);
-  }
+  };
 
   /**
    * Returns properly formatted `click` objects consumable by GA
@@ -96,7 +96,7 @@ var EETracker = (function(){
    */
   EETracker.prototype.getClick = function(item) {
     return this.getFieldedObject('click', item);
-  }
+  };
 
   /**
    *
@@ -123,7 +123,7 @@ var EETracker = (function(){
     });
 
     return newItem;
-  }
+  };
 
   return EETracker;
 })();
