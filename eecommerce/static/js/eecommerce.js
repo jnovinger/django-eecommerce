@@ -7,12 +7,11 @@ var EETracker = (function(){
    */
   var EETracker = function(data) {
     this.setData = this.setData.bind(this);
-    this.getFields = this.getFields.bind(this);
+    this.pushData = this.pushData.bind(this);
     this.getImpressions = this.getImpressions.bind(this);
     this.getImpression = this.getImpression.bind(this);
-    this.getFieldedObject = this.getFieldedObject.bind(this);
 
-    this.setData(data);
+    this.init(data);
   };
 
   /**
@@ -24,44 +23,54 @@ var EETracker = (function(){
 
   /**
    * Parse and set the JSON blob set in the page.
-   * @param {array<object>} data
+   * @param {object} data
+   * @returns {object} data Guaranteed to be an object-literal
    */
   EETracker.prototype.setData = function(data) {
     if (typeof(data) == 'string') {
       data = JSON.parse(data);
     }
+    data.objects = data.objects || [];
     this.data = data;
+    return data;
   };
 
   /**
-   * Fields common many actions
+   * The GA Enhanced Ecommerce data queue
    * @type {array}
    */
-  EETracker.baseFields = ['id', 'name', 'brand'];
+  EETracker.prototype.dataLayer = null;
 
   /**
-   * Fields for 'impression' actions
-   * @type {array}
+   *
    */
-  EETracker.impressionFields = EETracker.baseFields.concat([
-    'list', 'category', 'variant', 'position', 'price'
-  ]);
+  EETracker.prototype.currencyCode = 'USD';
 
   /**
-   * Fields for 'click' actions
-   * @type {array}
+   * Handle any setup
+   * @param {object} data
    */
-  EETracker.clickFields = EETracker.baseFields.concat([
-    'price', 'category', 'variant'
-  ]);
+  EETracker.prototype.init = function(data) {
+    data = this.setData(data);
+    this.currencyCode = data.currency || this.currencyCode;
+    this.dataLayer = window[data.dataLayer] || window.dataLayer;
+    this.handleInitialActions();
+  };
 
   /**
-   * Return the correct field name for a particular action
-   * @param {string} action
-   * @returns {array}
+   * Actions that should be pushed to GA immediately
    */
-  EETracker.prototype.getFields = function(action) {
-    return EETracker[action + 'Fields'];
+  var initialActions = [
+    'getImpressions'
+  ];
+
+  /**
+   *
+   */
+  EETracker.prototype.handleInitialActions = function() {
+    initialActions.forEach(function(element, index, array) {
+      this.pushData(this[element]());
+    }, this);
   };
 
   /**
@@ -69,7 +78,7 @@ var EETracker = (function(){
    * @returns {array}
    */
   EETracker.prototype.getImpressions = function() {
-    return this.data.map(this.getImpression, this);
+    return new impressionFieldObject(this.data.objects, this.currencyCode);
   };
 
   /**
@@ -77,52 +86,18 @@ var EETracker = (function(){
    * @param {object} item
    * @returns {object}
    */
-  EETracker.prototype.getImpression = function(item) {
-    return this.getFieldedObject('impression', item);
+  EETracker.prototype.getImpression = function(itemData) {
+    return new impressionObject(itemData);
   };
 
   /**
-   * Return an array of properly formatted `click` objects
-   * @returns {array}
+   * Push data to the GA Enhanced Analytics queue
+   * @param {object} data
    */
-  EETracker.prototype.getClicks = function() {
-    return this.data.map(this.getClick, this);
-  };
-
-  /**
-   * Returns properly formatted `click` objects consumable by GA
-   * @param {object} item
-   * @returns {object}
-   */
-  EETracker.prototype.getClick = function(item) {
-    return this.getFieldedObject('click', item);
-  };
-
-  /**
-   *
-   */
-  // EETracker.prototype.getClickedItem = function(?) {
-  //   var
-  // }
-
-  /**
-   * Generic function that builds a new object, that has the correct fields,
-   * from base item data.
-   * @param {string} type
-   * @param {object} item
-   * @returns {object}
-   */
-  EETracker.prototype.getFieldedObject = function(action, item) {
-    var newItem = {};
-    var fieldNames = this.getFields(action);
-
-    fieldNames.forEach(function(fieldName) {
-      if (item.hasOwnProperty(fieldName)) {
-        newItem[fieldName] = item[fieldName];
-      }
-    });
-
-    return newItem;
+  EETracker.prototype.pushData = function(data) {
+    console.log("Logging: ");
+    console.log(data);
+    this.dataLayer.push(data);
   };
 
   return EETracker;

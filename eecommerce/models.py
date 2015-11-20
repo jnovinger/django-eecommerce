@@ -52,9 +52,9 @@ class EnhancedEcommerceTracker(object):
     def track(self, item):
         self.items.add(item)
 
-
     def get_data(self, as_json=True):
-        data = []
+        data = {}
+        items = []
         brand = self.config.brand
 
         for item in self.items:
@@ -67,7 +67,10 @@ class EnhancedEcommerceTracker(object):
             if 'brand' not in item_data:
                 item_data['brand'] = brand
 
-            data.append(item_data)
+            items.append(item_data)
+
+        data['objects'] = items
+        data['dataLayer'] = 'dataLayer'
 
         if not as_json:
             return data
