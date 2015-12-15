@@ -72,7 +72,6 @@ var EETracker = (function(){
    */
   EETracker.prototype.init = function(data) {
     data = this.setData(data);
-    data.gaID = 'UA-38721533-2';
     this.type = data.type;
     if (!data.debug) {
       this.debug = noop;

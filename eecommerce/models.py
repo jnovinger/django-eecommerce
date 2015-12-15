@@ -100,6 +100,7 @@ class EnhancedEcommerceTracker(object):
         data['checkout'] = self.checkout
         data['type'] = self.page_type
         data['debug'] = settings.DEBUG
+        data['gaID'] = settings.GOOGLE_ANALYTICS_ID
 
         if not as_json:
             return data
