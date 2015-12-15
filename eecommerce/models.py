@@ -1,6 +1,7 @@
 from decimal import Decimal
 from json import dumps, JSONEncoder
 
+from django.conf import settings
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
 
@@ -26,38 +27,62 @@ class ExtendedJSONEncoder(JSONEncoder):
 
 class EnhancedEcommerceTracker(object):
     """Handles collecting/tracking/collating GA Enhanced Ecommerce data."""
-
-    actions = {
-        'impressions': ['list', 'brand', 'category', 'variant',
-                        'position', 'price'],
-        'click': ['price', 'brand', 'category', 'variant'],
-        'detail': ['price', 'brand', 'category', 'variant', 'list'],
-        'add': ['price', 'brand', 'category', 'variant', 'quantity'],
-        'remove': [],
-        'promo_view': [],
-        'promo_click': [],
-    }
+    PAGE_TYPES = (
+        'detail', 'checkout', 'list',
+    )
 
     def __init__(self, request, currency='USD', brand='Moniker'):
         self.config = config(request=request, currency=currency, brand=brand)
-        self.items = set()
+        self.items = {}
+        self.details = []
         self.impressions = []
-        self.click = {}
-        self.detail = {}
-        self.add = []
-        self.remove = []
-        self.promo_view = []
-        self.promo_click = []
+        self.checkout = {}
+        self.transactions = []
+        self.page_type = None
 
-    def track(self, item):
-        self.items.add(item)
+    def add_item(self, item):
+        hash_ = item.unique_hash
+        self.items[hash_] = item
+        return hash_
 
+    def track_detail(self, item):
+        hash_ = self.add_item(item)
+
+        if hash_ not in self.details:
+            self.details.append(hash_)
+
+        # don't record impressions for details items
+        impressions = self.impressions
+        while hash_ in impressions:
+            impressions.remove(hash_)
+        self.impressions = impressions
+
+    def track_impression(self, item):
+        hash_ = self.add_item(item)
+        if hash_ not in self.impressions:
+            self.impressions.append(hash_)
+
+    def track_checkout(self, step, **kwargs):
+        checkout = {
+            'step': step,
+        }
+        checkout.update(kwargs)
+
+        self.checkout = checkout
+
+    def track_transaction(self, transaction):
+        self.transactions.append(transaction)
+
+    def set_page_type(self, type_):
+        assert type_ in self.PAGE_TYPES
+        self.page_type = type_
 
     def get_data(self, as_json=True):
-        data = []
+        data = {}
+        items_ = {}
         brand = self.config.brand
 
-        for item in self.items:
+        for hash_, item in self.items.iteritems():
             if not hasattr(item, 'ee_data'):
                 continue
 
@@ -67,7 +92,14 @@ class EnhancedEcommerceTracker(object):
             if 'brand' not in item_data:
                 item_data['brand'] = brand
 
-            data.append(item_data)
+            items_[hash_] = item_data
+
+        data['items'] = items_
+        data['details'] = self.details
+        data['impressions'] = self.impressions
+        data['checkout'] = self.checkout
+        data['type'] = self.page_type
+        data['debug'] = settings.DEBUG
 
         if not as_json:
             return data
@@ -102,7 +134,8 @@ class EETrackerRegistry(object):
 
     def handle_instance_inited(self, sender, instance, **kwargs):
         for tracker in self._registry.itervalues():
-            tracker.track(instance)
+            # default action is impression
+            tracker.track_impression(instance)
 
     def get_tracker(self, request):
         registry = self._registry
@@ -117,3 +150,6 @@ class EETrackerRegistry(object):
         registry = self._registry
         if request in registry:
             del(self._registry[request])
+
+
+registry = EETrackerRegistry()
