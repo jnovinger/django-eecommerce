@@ -3,6 +3,13 @@
 History
 -------
 
+0.0.3 (2015-12-16)
+++++++++++++++++++
+
+* Fix possible "dictionary changed size during iteration" error
+* Refactored `EnhanceEcommerceTracker.get_data()` method
+* Fix two small bugs with `EnhanceEcommerceTracker.sendProductDetail()`
+
 0.0.2 (2015-12-15)
 ++++++++++++++++++
 
