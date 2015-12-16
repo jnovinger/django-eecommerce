@@ -101,7 +101,7 @@ var EETracker = (function(){
     this.sendImpressions();
     switch (this.type) {
       case 'detail':
-        this.sendProductDetail();
+        this.sendCompleteProductDetail();
         break;
       case 'checkout':
         this.sendImmediateCheckout();
@@ -177,14 +177,14 @@ var EETracker = (function(){
   EETracker.prototype.getProductByHash = function(hash) {
     var product = this.data.items[hash];
     if (product) {
-      return this.getProducts(product);
+      return this.getProduct(product);
     }
 
     return;
   };
 
   /**
-   * Send product data to GA
+   * Send product detail data to GA
    */
   EETracker.prototype.sendProductDetail = function() {
     var products = this.getProducts();
@@ -192,6 +192,14 @@ var EETracker = (function(){
       this.ga('ee.ec:addProduct', product);
     }, this);
   };
+
+  /**
+   * Send product detail data to GA and finalize the 'detail' action
+   */
+  EETracker.prototype.sendCompleteProductDetail = function() {
+    this.sendProductDetail();
+    this.ga('ee.ec:setAction', 'detail');
+  }
 
   /**
    *
