@@ -1,3 +1,4 @@
+from copy import copy
 from decimal import Decimal
 from json import dumps, JSONEncoder
 
@@ -81,8 +82,9 @@ class EnhancedEcommerceTracker(object):
         data = {}
         items_ = {}
         brand = self.config.brand
+        items = copy(self.items)
 
-        for hash_, item in self.items.iteritems():
+        for hash_, item in items.iteritems():
             if not hasattr(item, 'ee_data'):
                 continue
 
