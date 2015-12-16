@@ -79,30 +79,20 @@ class EnhancedEcommerceTracker(object):
         self.page_type = type_
 
     def get_data(self, as_json=True):
-        data = {}
-        items_ = {}
+        data = {
+            'details': self.details,
+            'impressions': self.impressions,
+            'checkout': self.checkout,
+            'type': self.page_type,
+            'debug': settings.DEBUG,
+            'gaID': settings.GOOGLE_ANALYTICS_ID,
+        }
         brand = self.config.brand
-        items = copy(self.items)
+        items = copy(self.items).iteritems()
 
-        for hash_, item in items.iteritems():
-            if not hasattr(item, 'ee_data'):
-                continue
-
-            item_data = item.ee_data()
-
-            # default brand
-            if 'brand' not in item_data:
-                item_data['brand'] = brand
-
-            items_[hash_] = item_data
-
-        data['items'] = items_
-        data['details'] = self.details
-        data['impressions'] = self.impressions
-        data['checkout'] = self.checkout
-        data['type'] = self.page_type
-        data['debug'] = settings.DEBUG
-        data['gaID'] = settings.GOOGLE_ANALYTICS_ID
+        data['items'] = {
+            h: i.ee_data(brand=brand) for h, i in items if hasattr(i, 'ee_data')
+        }
 
         if not as_json:
             return data
@@ -111,7 +101,8 @@ class EnhancedEcommerceTracker(object):
 
     @cached_property
     def data(self):
-        return self.get_data()
+        """Gets the ecommerce data, serializes it, caches it, and returns it"""
+        return self.get_data(as_json=True)
 
 
 class EETrackerRegistry(object):
