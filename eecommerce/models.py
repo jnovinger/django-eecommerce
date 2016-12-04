@@ -4,7 +4,7 @@ from json import dumps, JSONEncoder
 
 from django.conf import settings
 from django.db.models.signals import post_init
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, SimpleLazyObject
 
 from . import settings as ee_settings
 from .compat import import_by_path
@@ -146,4 +146,4 @@ class EETrackerRegistry(object):
             del(self._registry[request])
 
 
-registry = EETrackerRegistry()
+registry = SimpleLazyObject(lambda: EETrackerRegistry())
