@@ -4,7 +4,7 @@ from .models import EETrackerRegistry
 class EnhancedEcommerceTrackerMiddleware(object):
 
     def __init__(self, *args, **kwargs):
-        self._registry = EETrackerRegistry()
+        self.registry = EETrackerRegistry()
         super(EnhancedEcommerceTrackerMiddleware, self).__init__(*args,
                                                                  **kwargs)
 
