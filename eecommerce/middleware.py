@@ -1,9 +1,10 @@
-from .models import registry
+from .models import EETrackerRegistry
 
 
 class EnhancedEcommerceTrackerMiddleware(object):
 
     def __init__(self, *args, **kwargs):
+        self._registry = EETrackerRegistry()
         super(EnhancedEcommerceTrackerMiddleware, self).__init__(*args,
                                                                  **kwargs)
 
@@ -11,12 +12,12 @@ class EnhancedEcommerceTrackerMiddleware(object):
         tracker = getattr(request, 'ee_tracker', None)
         if tracker is None:
             assert hasattr(request, 'session'), 'Session framework is required'
-            tracker = registry.get_tracker(request)
+            tracker = self.registry.get_tracker(request)
             request.ee_tracker = tracker
         return tracker
 
     def _finish_tracker(self, request):
-        registry.finish_tracker(request)
+        self.registry.finish_tracker(request)
 
     def process_request(self, request):
         self._get_tracker(request)
